@@ -6,4 +6,4 @@ user_bp = Blueprint("user", __name__)
 
 @user_bp.get("/")
 def getalluser():
-    return "all user are here"
+    return "all user are here update"
