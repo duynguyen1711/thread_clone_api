@@ -23,3 +23,8 @@ def me():
         )
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
+
+
+@user_bp.put("/")
+def update_profile():
+    return "return ava"
