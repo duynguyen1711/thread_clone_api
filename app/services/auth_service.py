@@ -3,11 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token
 from app import db
 import validators
-import redis
-
-redis_client = redis.StrictRedis(
-    host="localhost", port=6379, db=0, decode_responses=True
-)
+from flask import current_app
 
 
 class AuthService:
@@ -29,15 +25,31 @@ class AuthService:
     def login_user(email, password):
         if not validators.email(email):
             raise ValueError("Email is not valid")
-        user = User.query.filter_by(email=email).first_or_404()
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            raise ValueError("Email does not exist")
         if not check_password_hash(user.password, password):
             raise ValueError("Incorrect password")
         access_token = create_access_token(
             identity=user.id
         )  # Sử dụng ID người dùng làm danh tính
+
         refresh_token = create_refresh_token(identity=user.id)
+        redis_client = current_app.redis_client
+        refresh_token_expires = current_app.config["JWT_REFRESH_TOKEN_EXPIRES"]
+        expires_in = int(refresh_token_expires.total_seconds())
+        redis_client.set(f"refresh_token:{user.id}", refresh_token, ex=expires_in)
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
             "user": {"id": user.id, "username": user.username, "email": user.email},
         }
+
+    @staticmethod
+    def refresh_token(user_id, refresh_token):
+        redis_client = current_app.redis_client
+        stored_refresh_token = redis_client.get(f"refresh_token:{user_id}")
+        if not stored_refresh_token != refresh_token:
+            raise ValueError("Invalid refresh token")
+        new_access_token = create_access_token(identity=user_id)
+        return {"access_token": new_access_token}

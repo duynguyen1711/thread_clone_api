@@ -2,8 +2,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from config import Config
-
 from flask_jwt_extended import JWTManager
+from redis import Redis
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -20,7 +20,10 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)  # Khởi tạo migrate với app và db
     jwt.init_app(app)
+    redis_client = Redis.from_url(app.config["REDIS_URL"])
 
+    # Gán redis_client vào ứng dụng Flask để có thể truy cập từ bất kỳ đâu
+    app.redis_client = redis_client
     # Import các mô-đun models tại đây
     from .models import Thread, User, Comment
 

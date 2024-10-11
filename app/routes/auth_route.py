@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from ..services.auth_service import AuthService
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/v1/auth")
 
@@ -48,3 +49,17 @@ def login():
         )
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
+
+
+@auth_bp.route("/refresh", methods=["POST"])
+@jwt_required(refresh=True)
+def refresh():
+    # Lấy user_id từ token
+    current_user_id = get_jwt_identity()  # Lấy ID của người dùng từ token
+    refresh_token = request.json.get("refresh_token")
+
+    try:
+        new_tokens = AuthService.refresh_token(current_user_id, refresh_token)
+        return jsonify(new_tokens), 200
+    except ValueError as e:
+        return jsonify({"message": str(e)}), 401
