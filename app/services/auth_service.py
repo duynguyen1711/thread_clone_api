@@ -30,6 +30,8 @@ class AuthService:
             raise ValueError("Email does not exist")
         if not check_password_hash(user.password, password):
             raise ValueError("Incorrect password")
+        if user.account_status != "active":
+            raise ValueError("Account is not active")
         access_token = create_access_token(
             identity=user.id
         )  # Sử dụng ID người dùng làm danh tính
