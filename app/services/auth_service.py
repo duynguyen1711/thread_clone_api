@@ -4,6 +4,7 @@ from flask_jwt_extended import create_access_token, create_refresh_token
 from app import db
 import validators
 from flask import current_app
+from ..constraints.user_enum import AccountStatus
 
 
 class AuthService:
@@ -25,12 +26,12 @@ class AuthService:
     def login_user(email, password):
         if not validators.email(email):
             raise ValueError("Email is not valid")
-        user = User.query.filter_by(email=email).first()
+        user: User = User.query.filter_by(email=email).first()
         if not user:
             raise ValueError("Email does not exist")
         if not check_password_hash(user.password, password):
             raise ValueError("Incorrect password")
-        if user.account_status != "active":
+        if user.account_status.value != AccountStatus.ACTIVE.value:
             raise ValueError("Account is not active")
         access_token = create_access_token(
             identity=user.id

@@ -5,15 +5,17 @@ from app import db
 
 class UserService:
     @staticmethod
-    def get_user_by_id(user_id):
+    def get_user_by_id(user_id) -> User:
         user = User.query.filter_by(id=user_id).first()
         if not user:
             raise ValueError("User not exist")
         return user
 
     @staticmethod
-    def change_password(user_id, current_password, new_password, confirm_new_password):
-        user = User.query.get(user_id)
+    def change_password(
+        user_id: int, current_password, new_password, confirm_new_password
+    ):
+        user: User = User.query.get(user_id)
         if not user:
             raise ValueError("User not found")
         if not check_password_hash(user.password, current_password):

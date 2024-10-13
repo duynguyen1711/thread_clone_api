@@ -2,6 +2,12 @@ from enum import Enum
 
 
 class AccountStatus(Enum):
-    ACTIVE = "active"
-    INACTIVE = "inactive"
-    DELETED = "deleted"
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    BANNED = "BANNED"
+    DELETED = "DELETED"
+
+
+class UserRole(Enum):
+    ADMIN = "ADMIN"
+    USER = "USER"

@@ -19,7 +19,6 @@ def me():
                     "username": user.username,
                     "email": user.email,
                     "ava_url": user.avatar_url,
-                    "password": user.password,
                 }
             }
         )
@@ -58,21 +57,3 @@ def change_password():
     except ValueError as e:
         print(f"Error occurred: {str(e)}")  # In ra thông báo lỗi chi tiết
         return jsonify({"error": str(e)}), 400
-
-
-@user_bp.route("/verify-password", methods=["POST"])
-@jwt_required()
-def verify_password():
-    current_user_id = get_jwt_identity()  # Lấy user_id từ JWT
-    data = request.get_json()
-
-    if not data or "password" not in data:
-        return jsonify({"message": "Password is required"}), 400
-
-    password = data["password"]
-    is_valid = UserService.test_password_verification(current_user_id, password)
-
-    if is_valid:
-        return jsonify({"message": "Password is correct"}), 200
-    else:
-        return jsonify({"message": "Invalid password"}), 401
